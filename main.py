@@ -9,34 +9,34 @@ import pdfplumber
 import google.generativeai as genai
 
 # -----------------------------
-# ⚙️ CONFIGURATION
+# CONFIGURATION
 # -----------------------------
 st.set_page_config(
-    page_title="AI Document Chatbot 🤖",
+    page_title="AI Document Chatbot ",
     page_icon="https://cdn-icons-png.flaticon.com/512/4712/4712102.png",
     layout="wide"
 )
 
-# ✅ Gemini API setup
+# Gemini API setup
 genai.configure(api_key="jaosygjsvbmnxbna782ganiosdnm")  # replace with your Gemini API key
 
-# ✅ Embedding model
+# Embedding model
 embed_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
 # -----------------------------
-# 🧠 CHROMADB SETUP
+# CHROMADB SETUP
 # -----------------------------
 client_chroma = chromadb.PersistentClient(path="./chroma_db")
 collection = client_chroma.get_or_create_collection(name="docs_embeddings")
 
 # -----------------------------
-# 💬 CHAT HISTORY
+# CHAT HISTORY
 # -----------------------------
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # -----------------------------
-# 🌈 STYLING (unchanged)
+# STYLING (unchanged)
 # -----------------------------
 st.markdown("""
 <style>
@@ -98,15 +98,15 @@ header p { color: #c0c0c0; font-size: 18px; }
 </style>
 <header>
     <img src="https://cdn-icons-png.flaticon.com/512/4712/4712102.png" width="100">
-    <h1>🤖 AI Document Chatbot</h1>
+    <h1> AI Document Chatbot</h1>
     <p>Upload • Summarize • Chat — with a human touch</p>
 </header>
 """, unsafe_allow_html=True)
 
 # -----------------------------
-# 📂 FILE UPLOAD
+# FILE UPLOAD
 # -----------------------------
-uploaded_files = st.file_uploader("📂 Upload one or more documents",
+uploaded_files = st.file_uploader(" Upload one or more documents",
                                   type=["pdf", "docx", "txt"], accept_multiple_files=True)
 
 def extract_text(file):
@@ -130,19 +130,19 @@ def extract_text(file):
         else:
             text = file.read().decode("utf-8")
     except Exception as e:
-        st.warning(f"⚠️ Couldn't read {file.name}. Reason: {e}")
+        st.warning(f" Couldn't read {file.name}. Reason: {e}")
     return text
 
 # -----------------------------
-# 🧠 PROCESS & SUMMARIZE
+# PROCESS & SUMMARIZE
 # -----------------------------
 if uploaded_files:
     model = genai.GenerativeModel("gemini-2.5-flash")
     for uploaded_file in uploaded_files:
-        with st.spinner(f"🧩 Processing {uploaded_file.name}..."):
+        with st.spinner(f" Processing {uploaded_file.name}..."):
             text_data = extract_text(uploaded_file)
             if not text_data.strip():
-                st.warning(f"⚠️ No readable text in {uploaded_file.name}.")
+                st.warning(f" No readable text in {uploaded_file.name}.")
                 continue
 
             splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
@@ -161,32 +161,32 @@ if uploaded_files:
                 response = model.generate_content(prompt)
                 summary = response.text.strip()
             except Exception as e:
-                summary = f"⚠️ Error generating summary: {e}"
+                summary = f" Error generating summary: {e}"
 
-            st.subheader(f"📘 Summary for {uploaded_file.name}:")
+            st.subheader(f" Summary for {uploaded_file.name}:")
             st.markdown(f"<div class='chat-bubble-bot'>{summary}</div>", unsafe_allow_html=True)
 
-    st.success("✅ All files processed and stored!")
+    st.success(" All files processed and stored!")
 
 # -----------------------------
-# 💬 CHATBOT SECTION
+# CHATBOT SECTION
 # -----------------------------
-st.subheader("💬 Ask Anything About Your Documents")
+st.subheader(" Ask Anything About Your Documents")
 query = st.text_input("Type your question...")
 
 col1, col2 = st.columns([1, 0.3])
 with col2:
-    if st.button("🗑️ Clear Chat History"):
+    if st.button(" Clear Chat History"):
         st.session_state.chat_history = []
         st.success("Chat history cleared!")
-    if st.button("🧹 Clear Document Memory"):
+    if st.button(" Clear Document Memory"):
         ids = collection.get()["ids"]
         if ids:
             collection.delete(ids=ids)
-            st.success("🧠 Document memory cleared!")
+            st.success(" Document memory cleared!")
 
 # -----------------------------
-# 🧍 HUMAN-LIKE ANSWERING
+# HUMAN-LIKE ANSWERING
 # -----------------------------
 if query:
     results = collection.query(
@@ -216,22 +216,22 @@ Question: {query}
             response = model.generate_content(prompt)
             answer = response.text.strip()
         except Exception as e:
-            answer = f"⚠️ Error from Gemini: {str(e)}"
+            answer = f" Error from Gemini: {str(e)}"
 
     # Save chat
     st.session_state.chat_history.append(("User", query))
     st.session_state.chat_history.append(("Bot", answer))
 
     # Display messages
-    st.markdown(f"<div class='chat-bubble-user'><b>🧑‍💻 You:</b> {query}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='chat-bubble-bot'><b>🤖 Bot:</b> {answer}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='chat-bubble-user'><b> You:</b> {query}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='chat-bubble-bot'><b> Bot:</b> {answer}</div>", unsafe_allow_html=True)
 
 # -----------------------------
-# 🕒 CHAT HISTORY
+# CHAT HISTORY
 # -----------------------------
 if st.session_state.chat_history:
-    st.subheader("🕒 Chat History")
+    st.subheader(" Chat History")
     for role, msg in st.session_state.chat_history:
         bubble = 'chat-bubble-user' if role == "User" else 'chat-bubble-bot'
-        icon = "🧑‍💻" if role == "User" else "🤖"
+        icon = "" if role == "User" else ""
         st.markdown(f"<div class='{bubble}'><b>{icon} {role}:</b> {msg}</div>", unsafe_allow_html=True)
